@@ -1549,7 +1549,11 @@ PJRT_Error* PJRT_LoadedExecutable_Execute(
   options.arguments_are_tupled = false;
   options.untuple_result = true;
   if (args->options->context) {
-    options.context = args->options->context->execute_context.get();
+    if (std::holds_alternative<std::shared_ptr<xla::ExecuteContext>>(args->options->context->execute_context)) {
+        options.context = std::get<std::shared_ptr<xla::ExecuteContext>>(args->options->context->execute_context).get();
+    } else if (std::holds_alternative<const xla::ExecuteContext*>(args->options->context->execute_context)) {
+        options.context = std::get<const xla::ExecuteContext*>(args->options->context->execute_context);
+    }
   }
   options.multi_slice_config = nullptr;
   options.use_major_to_minor_data_layout_for_callbacks = true;
